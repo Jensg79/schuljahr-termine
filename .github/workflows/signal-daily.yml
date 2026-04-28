@@ -35,6 +35,5 @@ jobs:
         with:
           name: workflow-logs-${{ github.run_id }}
           retention-days: 7
-          if-no-files-found: ignore
-          path: |
-            *.log
+          if-no-files-found: warn
+          path: logs/
