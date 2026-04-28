@@ -1,0 +1,27 @@
+# .github/workflows/signal-daily.yml
+
+name: Tägliche Signal-Nachricht
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # täglich um 07:00 Uhr (MEZ = UTC+1)
+  workflow_dispatch:       # manueller Test-Start möglich
+
+jobs:
+  send-signal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Termine zusammenstellen
+        id: termine
+        run: |
+          TEXT="Guten Morgen! Deine heutigen Termine: ..."
+          # Hier kannst du später Kalender-API-Abfragen einbauen
+          echo "text=$TEXT" >> $GITHUB_OUTPUT
+
+      - name: Signal-Nachricht senden
+        run: |
+          curl -G "https://signal.callmebot.com/signal/send.php" \
+            --data-urlencode "phone=${{ secrets.SIGNAL_PHONE }}" \
+            --data-urlencode "apikey=${{ secrets.SIGNAL_APIKEY }}" \
+            --data-urlencode "text=${{ steps.termine.outputs.text }}"
