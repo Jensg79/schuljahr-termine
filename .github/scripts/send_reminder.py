@@ -1,7 +1,7 @@
 import os
 import urllib.request
 import urllib.parse
-from datetime import date, timedelta
+from datetime import date
 
 LIMIT = 1500
 today = date.today()
@@ -50,7 +50,7 @@ def fmt_heute(mit_hinweis=True):
         zeilen.append("  Heute keine Termine")
     return zeilen
 
-def fmt_woche(mit_hinweis=True):
+def fmt_woche(mit_hinweis=False):
     if not woche_termine:
         return []
     zeilen = ["\n\U0001f4c5 Diese Woche"]
@@ -61,7 +61,7 @@ def fmt_woche(mit_hinweis=True):
         zeilen.append(zeile)
     return zeilen
 
-def fmt_spaeter(limit=10, mit_hinweis=True):
+def fmt_spaeter(limit=10, mit_hinweis=False):
     if not spaeter_termine:
         return []
     zeilen = ["\n\U0001f52d Sp\xe4tere Termine"]
@@ -82,7 +82,7 @@ def warn():
         z.append("  • " + v)
     return z
 
-def baue(heute_hint=True, woche_hint=True, spaeter_limit=10, spaeter_hint=True):
+def baue(heute_hint=True, woche_hint=False, spaeter_limit=10, spaeter_hint=False):
     teile = ["Guten Morgen Jens — " + today.strftime('%d.%m.%Y') + " (" + wt_heute + ")"]
     teile.extend(fmt_heute(mit_hinweis=heute_hint))
     teile.extend(fmt_woche(mit_hinweis=woche_hint))
@@ -90,13 +90,12 @@ def baue(heute_hint=True, woche_hint=True, spaeter_limit=10, spaeter_hint=True):
     teile.extend(warn())
     return "\n".join(teile)
 
-# Kuerzungsstufen
+# Kuerzungsstufen (Standard: Heute mit Hinweis, Woche+Spaeter ohne)
 stufen = [
-    (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=10, spaeter_hint=True),  "1"),
-    (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=5,  spaeter_hint=True),  "2"),
-    (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=10, spaeter_hint=False), "3"),
-    (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=5,  spaeter_hint=False), "4"),
-    (lambda: baue(heute_hint=True,  woche_hint=False, spaeter_limit=0,  spaeter_hint=False), "5"),
+    (lambda: baue(heute_hint=True,  woche_hint=False, spaeter_limit=10, spaeter_hint=False), "1"),
+    (lambda: baue(heute_hint=True,  woche_hint=False, spaeter_limit=5,  spaeter_hint=False), "2"),
+    (lambda: baue(heute_hint=True,  woche_hint=False, spaeter_limit=0,  spaeter_hint=False), "3"),
+    (lambda: baue(heute_hint=False, woche_hint=False, spaeter_limit=0,  spaeter_hint=False), "4"),
 ]
 
 message = None
@@ -112,7 +111,7 @@ if message is None:
     message = baue(heute_hint=False, woche_hint=False, spaeter_limit=0, spaeter_hint=False)
     if len(message) > LIMIT:
         message = message[:LIMIT - 1] + "…"
-    stufe_nr = "6"
+    stufe_nr = "5"
 
 if stufe_nr != "1":
     message += "\nℹ️ Nachricht gek\xfcrzt (Stufe " + stufe_nr + ")"
