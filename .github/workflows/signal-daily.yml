@@ -11,13 +11,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-     - name: Termine lesen und Signal senden
-    env:
-      SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
-      SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
-    run: python3 .github/scripts/send_reminder.py
-    continue-on-error: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Notify on failure
-      if: failure()
-      run: echo "Signal reminder failed at $(date)"
+      - name: Validate secrets
+        run: |
+          if [[ -z "${{ secrets.SIGNAL_PHONE }}" ]] || [[ -z "${{ secrets.SIGNAL_APIKEY }}" ]]; then
+            echo "ERROR: Required secrets not configured"
+            exit 1
+          fi
+
+      - name: Termine lesen und Signal senden
+        env:
+          SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
+          SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
+        run: python3 .github/scripts/send_reminder.py
+
+      - name: Upload workflow logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-logs-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: ignore
+          paths: |
+            *.log
