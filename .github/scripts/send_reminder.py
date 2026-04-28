@@ -100,7 +100,7 @@ try:
     with urllib.request.urlopen(url, timeout=30) as resp:
         antwort = resp.read().decode()
     print(f"Signal-Antwort: {antwort}")
-    if any(w in antwort.lower() for w in ['queued', 'sent', 'ok']):
+    if 'error' not in antwort.lower():
         print("✅ Signal-Versand erfolgreich")
     else:
         print(f"❌ Signal-Versand fehlgeschlagen: {antwort}")
