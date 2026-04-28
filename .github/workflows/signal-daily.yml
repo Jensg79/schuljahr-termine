@@ -11,8 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Termine lesen und Signal senden
-        env:
-          SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
-          SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
-        run: python3 .github/scripts/send_reminder.py
+     - name: Termine lesen und Signal senden
+    env:
+      SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
+      SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
+    run: python3 .github/scripts/send_reminder.py
+    continue-on-error: true
+
+    - name: Notify on failure
+      if: failure()
+      run: echo "Signal reminder failed at $(date)"
