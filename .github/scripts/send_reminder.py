@@ -139,7 +139,7 @@ def format_later_section(
     if not termine:
         return ""
     
-    lines = ["\n�� Spätere Termine"]
+    lines = ["\n📅 Spätere Termine"]
     for termin in termine[:limit]:
         line = f"  • {termin.weekday} {termin.event_date.strftime('%d.%m.%Y')} (in {termin.days_until}T) — {termin.task}"
         if include_notes and termin.note:
