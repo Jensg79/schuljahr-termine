@@ -15,11 +15,3 @@ YYYY-MM-DD | Aufgabe | (optional) Hinweis
 ```
 
 Zeilen mit `#` oder leerem Inhalt werden ignoriert.
-
-## Signal-Credentials
-
-Werden aus `signal-credentials.txt` im lokalen Cowork-Ordner gelesen:
-```
-phone=+49...
-apikey=...
-```
