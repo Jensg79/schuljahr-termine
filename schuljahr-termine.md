@@ -7,9 +7,7 @@ Du wirst erinnert, wenn ein Termin in **4 Wochen**, **2 Wochen** oder **3 Tagen*
 
 Jede Zeile mit einem Termin folgt diesem Schema:
 
-```
-YYYY-MM-DD | Aufgabe | (optional) Hinweis
-```
+<!--  YYYY-MM-DD | Aufgabe | (optional) Hinweis -->
 
 - Datum im Format **Jahr-Monat-Tag** (z.B. `2026-06-12`)
 - Trennzeichen: `|` (Pipe)
@@ -174,8 +172,10 @@ YYYY-MM-DD | Aufgabe | (optional) Hinweis
 ## Schuljahr 2026/2027
 
 
-2026-09-14 | Lehrerkonferenz zum 1. Schultag | Nachprüfungen Mathematik?
+2026-09-14 | Lehrerkonferenz zum 1. Schultag | Nachprüfungen Mathematik
+
 2026-09-24 |  Wiesn mit Kollegen | Schottenhammel
+
 2027-05-05 | Abitur Mathematik | 
 
 
