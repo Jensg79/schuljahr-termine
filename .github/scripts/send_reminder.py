@@ -3,6 +3,7 @@ import urllib.request
 import urllib.parse
 from datetime import date
 
+LIMIT = 1500
 today = date.today()
 WOCHENTAG = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 
@@ -31,7 +32,7 @@ with open('schuljahr-termine.md', 'r', encoding='utf-8') as f:
                 verworfen.append(line)
 
 wt_heute = WOCHENTAG[today.weekday()]
-out = [f"Guten Morgen Jens — {today.strftime('%d.%m.%Y')} ({wt_heute})"]
+header = f"Guten Morgen Jens — {today.strftime('%d.%m.%Y')} ({wt_heute})"
 
 # A) Punkt-Erinnerungen: genau 28, 14 oder 3 Tage vorher
 erinnerungen = []
@@ -42,48 +43,83 @@ for tage, label in [(28, '4 Wochen'), (14, '2 Wochen'), (3, '3 Tagen')]:
         for d, a, h in treffer:
             erinnerungen.append(f"  • {a}" + (f" — {h}" if h else ""))
 
-if erinnerungen:
-    out.append("\n\U0001f514 Heute f\xe4llige Erinnerungen")
-    out.extend(erinnerungen)
-
 # B) Wochenvorschau: 0-7 Tage
-woche = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 0 <= diff <= 7]
-if woche:
-    out.append("\n\U0001f4c5 Diese Woche (n\xe4chste 7 Tage)")
-    for diff, d, wt, a, h in woche:
-        tage_str = "heute" if diff == 0 else f"in {diff} Tag{'en' if diff != 1 else ''}"
-        zeile = f"  • {wt} {d.strftime('%d.%m.')} ({tage_str}) — {a}"
-        if h:
-            zeile += f" — {h}"
-        out.append(zeile)
+def wochenzeilen(mit_hinweis=True):
+    zeilen = []
+    woche = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 0 <= diff <= 7]
+    if woche:
+        zeilen.append("\n\U0001f4c5 Diese Woche (n\xe4chste 7 Tage)")
+        for diff, d, wt, a, h in woche:
+            tage_str = "heute" if diff == 0 else f"in {diff} Tag{'en' if diff != 1 else ''}"
+            zeile = f"  • {wt} {d.strftime('%d.%m.')} ({tage_str}) — {a}"
+            if mit_hinweis and h:
+                zeile += f" — {h}"
+            zeilen.append(zeile)
+    return zeilen
 
 # C) 6-Wochen-Übersicht: 8-42 Tage
-sechs = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 8 <= diff <= 42]
-if sechs:
-    out.append("\n\U0001f52d N\xe4chste 6 Wochen")
-    for diff, d, wt, a, h in sechs[:10]:
-        zeile = f"  • {wt} {d.strftime('%d.%m.')} (in {diff} Tagen) — {a}"
-        if h:
-            zeile += f" — {h}"
-        out.append(zeile)
-    if len(sechs) > 10:
-        out.append("  … (weitere ausgelassen)")
+def sechswochen(limit=10, mit_hinweis=True):
+    zeilen = []
+    sechs = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 8 <= diff <= 42]
+    if sechs:
+        zeilen.append("\n\U0001f52d N\xe4chste 6 Wochen")
+        for diff, d, wt, a, h in sechs[:limit]:
+            zeile = f"  • {wt} {d.strftime('%d.%m.')} (in {diff} Tagen) — {a}"
+            if mit_hinweis and h:
+                zeile += f" — {h}"
+            zeilen.append(zeile)
+        if len(sechs) > limit:
+            zeilen.append("  … (weitere ausgelassen)")
+    return zeilen
 
-if not erinnerungen and not woche and not sechs:
-    out.append("Heute keine anstehenden Termine in der Liste.")
+def warn_zeilen():
+    zeilen = []
+    if verworfen:
+        zeilen.append("\n⚠️ Folgende Zeilen konnten nicht gelesen werden:")
+        for z in verworfen:
+            zeilen.append(f"  • {z}")
+    return zeilen
 
-if verworfen:
-    out.append("\n⚠️ Folgende Zeilen konnten nicht gelesen werden:")
-    for z in verworfen:
-        out.append(f"  • {z}")
+def baue_nachricht(mit_sechs=True, sechs_limit=10, mit_hinweisen=True):
+    teile = [header]
+    if erinnerungen:
+        teile.append("\n\U0001f514 Heute f\xe4llige Erinnerungen")
+        teile.extend(erinnerungen)
+    teile.extend(wochenzeilen(mit_hinweis=mit_hinweisen))
+    if mit_sechs:
+        teile.extend(sechswochen(limit=sechs_limit, mit_hinweis=mit_hinweisen))
+    if not erinnerungen and not wochenzeilen() and not sechswochen():
+        teile.append("Heute keine anstehenden Termine in der Liste.")
+    teile.extend(warn_zeilen())
+    return "\n".join(teile)
 
-message = "\n".join(out)
-if len(message) > 1500:
-    message = message[:1497] + "…"
+# Kürzungstufen: volle Version → ohne 6W-Hinweise → 6W auf 5 → ohne 6W → ohne Hinweise überall
+stufen = [
+    lambda: baue_nachricht(mit_sechs=True,  sechs_limit=10, mit_hinweisen=True),
+    lambda: baue_nachricht(mit_sechs=True,  sechs_limit=5,  mit_hinweisen=True),
+    lambda: baue_nachricht(mit_sechs=True,  sechs_limit=10, mit_hinweisen=False),
+    lambda: baue_nachricht(mit_sechs=False,                 mit_hinweisen=True),
+    lambda: baue_nachricht(mit_sechs=False,                 mit_hinweisen=False),
+]
+
+message = None
+for i, stufe in enumerate(stufen):
+    kandidat = stufe()
+    if len(kandidat) <= LIMIT:
+        if i > 0:
+            print(f"ℹ️ Nachricht gek\xfcrzt (Stufe {i})")
+        message = kandidat
+        break
+
+if message is None:
+    # Notfallkürzung: nur Header + Erinnerungen, hart abschneiden
+    message = baue_nachricht(mit_sechs=False, mit_hinweisen=False)
+    if len(message) > LIMIT:
+        message = message[:LIMIT - 1] + "…"
 
 print("--- Nachricht ---")
 print(message)
-print("-----------------")
+print(f"--- {len(message)} Zeichen ---")
 
 # Signal-Versand
 phone = os.environ.get('SIGNAL_PHONE', '').strip()
