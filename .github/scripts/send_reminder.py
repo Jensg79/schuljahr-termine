@@ -34,17 +34,17 @@ with open('schuljahr-termine.md', 'r', encoding='utf-8') as f:
 wt_heute = WOCHENTAG[today.weekday()]
 
 # Termine nach Sektionen aufteilen
-heute_termine  = [(d, wt, a, h) for diff, d, wt, a, h in termine if diff == 0]
-woche_termine  = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 1 <= diff <= 7]
+heute_termine   = [(d, wt, a, h) for diff, d, wt, a, h in termine if diff == 0]
+woche_termine   = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if 1 <= diff <= 7]
 spaeter_termine = [(diff, d, wt, a, h) for diff, d, wt, a, h in termine if diff > 7]
 
 def fmt_heute(mit_hinweis=True):
-    zeilen = [f"\n\U0001f4cc Heute — {today.strftime('%d.%m.%Y')} ({wt_heute})"]
+    zeilen = ["\n\U0001f4cc Heute — " + today.strftime('%d.%m.%Y') + " (" + wt_heute + ")"]
     if heute_termine:
         for d, wt, a, h in heute_termine:
-            zeile = f"  • {a}"
+            zeile = "  • " + a
             if mit_hinweis and h:
-                zeile += f" — {h}"
+                zeile += " — " + h
             zeilen.append(zeile)
     else:
         zeilen.append("  Heute keine Termine")
@@ -53,25 +53,25 @@ def fmt_heute(mit_hinweis=True):
 def fmt_woche(mit_hinweis=True):
     if not woche_termine:
         return []
-    zeilen = [f"\n\U0001f4c5 Diese Woche"]
+    zeilen = ["\n\U0001f4c5 Diese Woche"]
     for diff, d, wt, a, h in woche_termine:
-        zeile = f"  • {wt} {d.strftime('%d.%m.')} — {a}"
+        zeile = "  • " + wt + " " + d.strftime('%d.%m.') + " — " + a
         if mit_hinweis and h:
-            zeile += f" — {h}"
+            zeile += " — " + h
         zeilen.append(zeile)
     return zeilen
 
 def fmt_spaeter(limit=10, mit_hinweis=True):
     if not spaeter_termine:
         return []
-    zeilen = [f"\n\U0001f52d Sp\xe4tere Termine"]
+    zeilen = ["\n\U0001f52d Sp\xe4tere Termine"]
     for diff, d, wt, a, h in spaeter_termine[:limit]:
-        zeile = f"  • {wt} {d.strftime('%d.%m.')} (in {diff}T) — {a}"
+        zeile = "  • " + wt + " " + d.strftime('%d.%m.') + " (in " + str(diff) + "T) — " + a
         if mit_hinweis and h:
-            zeile += f" — {h}"
+            zeile += " — " + h
         zeilen.append(zeile)
     if len(spaeter_termine) > limit:
-        zeilen.append(f"  … ({len(spaeter_termine) - limit} weitere)")
+        zeilen.append("  … (" + str(len(spaeter_termine) - limit) + " weitere)")
     return zeilen
 
 def warn():
@@ -79,18 +79,18 @@ def warn():
         return []
     z = ["\n⚠️ Nicht lesbare Zeilen:"]
     for v in verworfen:
-        z.append(f"  • {v}")
+        z.append("  • " + v)
     return z
 
 def baue(heute_hint=True, woche_hint=True, spaeter_limit=10, spaeter_hint=True):
-    teile = [f"Guten Morgen Jens — {today.strftime('%d.%m.%Y')} ({wt_heute})"]
+    teile = ["Guten Morgen Jens — " + today.strftime('%d.%m.%Y') + " (" + wt_heute + ")"]
     teile.extend(fmt_heute(mit_hinweis=heute_hint))
     teile.extend(fmt_woche(mit_hinweis=woche_hint))
     teile.extend(fmt_spaeter(limit=spaeter_limit, mit_hinweis=spaeter_hint))
     teile.extend(warn())
     return "\n".join(teile)
 
-# Kürzungsstufen
+# Kuerzungsstufen
 stufen = [
     (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=10, spaeter_hint=True),  "1"),
     (lambda: baue(heute_hint=True,  woche_hint=True,  spaeter_limit=5,  spaeter_hint=True),  "2"),
@@ -115,14 +115,14 @@ if message is None:
     stufe_nr = "6"
 
 if stufe_nr != "1":
-    message += f"\nℹ️ Nachricht gek\xfcrzt (Stufe {stufe_nr})"
+    message += "\nℹ️ Nachricht gek\xfcrzt (Stufe " + stufe_nr + ")"
 
 print("--- Nachricht ---")
 print(message)
-print(f"--- {len(message)} Zeichen ---")
+print("--- " + str(len(message)) + " Zeichen ---")
 
 # Signal-Versand
-phone = os.environ.get('SIGNAL_PHONE', '').strip()
+phone  = os.environ.get('SIGNAL_PHONE',  '').strip()
 apikey = os.environ.get('SIGNAL_APIKEY', '').strip()
 
 if not phone or not apikey:
@@ -130,17 +130,17 @@ if not phone or not apikey:
     raise SystemExit(1)
 
 params = urllib.parse.urlencode({'phone': phone, 'apikey': apikey, 'text': message})
-url = f"https://signal.callmebot.com/signal/send.php?{params}"
+url = "https://signal.callmebot.com/signal/send.php?" + params
 
 try:
     with urllib.request.urlopen(url, timeout=30) as resp:
         antwort = resp.read().decode()
-    print(f"Signal-Antwort: {antwort}")
+    print("Signal-Antwort: " + antwort)
     if 'error' not in antwort.lower():
-        print("✅ Signal-Versand erfolgreich")
+        print("Signal-Versand erfolgreich")
     else:
-        print(f"❌ Signal-Versand fehlgeschlagen: {antwort}")
+        print("Signal-Versand fehlgeschlagen: " + antwort)
         raise SystemExit(1)
 except urllib.error.URLError as e:
-    print(f"❌ Netzwerkfehler: {e}")
+    print("Netzwerkfehler: " + str(e))
     raise SystemExit(1)
