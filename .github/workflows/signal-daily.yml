@@ -2,12 +2,13 @@ name: Tägliche Signal-Nachricht
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # 08:00 MESZ / 07:00 MEZ
+    - cron: '0 6 * * 1-5'  # Mo–Fr, 08:00 MESZ / 07:00 MEZ (kein Wochenende)
   workflow_dispatch:
 
 jobs:
   send-signal:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,25 +17,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validate secrets
-        run: |
-          if [[ -z "${{ secrets.SIGNAL_PHONE }}" ]] || [[ -z "${{ secrets.SIGNAL_APIKEY }}" ]]; then
-            echo "ERROR: Required secrets not configured"
-            exit 1
-          fi
-
       - name: Termine lesen und Signal senden
         env:
-          SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
+          SIGNAL_PHONE:  ${{ secrets.SIGNAL_PHONE }}
           SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
           HIGHLIGHT_TAGS: "Mathematik"
         run: python3 .github/scripts/send_reminder.py
-
-      - name: Upload workflow logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: workflow-logs-${{ github.run_id }}
-          retention-days: 7
-          if-no-files-found: warn
-          path: logs/
