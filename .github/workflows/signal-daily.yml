@@ -27,6 +27,7 @@ jobs:
         env:
           SIGNAL_PHONE: ${{ secrets.SIGNAL_PHONE }}
           SIGNAL_APIKEY: ${{ secrets.SIGNAL_APIKEY }}
+          HIGHLIGHT_TAGS: "Mathematik,Physik"
         run: python3 .github/scripts/send_reminder.py
 
       - name: Upload workflow logs
