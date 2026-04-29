@@ -30,6 +30,7 @@ Jede Zeile mit einem Termin folgt diesem Schema:
 
 2026-05-06 | Abitur schriftlich: Mathematik | 9.00 - 14.00 Uhr | Mathematik
 2026-05-06 | Frankreich-Austausch 8. Klasse - franz. Gegenbesuch | franz. SuS aus Aix-en-Provence am GG
+2026-05-07 | Vorbereitung Abitur Mathematik | Einweisung Teil A für die Kollegen | Mathematik
 
 2026-05-07 | 5. Klassenrat | keine Kurzstunden
 
