@@ -1,3 +1,10 @@
+"""
+Send schedule reminder via Signal API.
+
+This script reads a markdown schedule file, formats upcoming events,
+and sends a message via the CallMeBot Signal API.
+"""
+
 import logging
 import os
 import urllib.error
@@ -5,7 +12,6 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import date
-from pathlib import Path
 from typing import Optional
 
 # Configuration
@@ -175,7 +181,7 @@ def build_message(
     Build the complete message from pre-parsed data.
 
     Args:
-        termine:              Pre-parsed list of Termin objects (avoids repeated file reads).
+        termine:              Pre-parsed list of Termin objects.
         discarded:            Lines that could not be parsed.
         heute_include_notes:  Show notes for today's events.
         week_include_notes:   Show notes for this-week events.
@@ -227,8 +233,6 @@ def truncate_with_fallback(
     """
     Progressively truncate message until it fits within the character limit.
 
-    Accepts pre-parsed data so the schedule file is only read once.
-
     Returns:
         Tuple of (message, truncation_stage) where stage 1 = no truncation.
     """
@@ -263,7 +267,9 @@ def truncate_with_fallback(
 
 def send_via_signal(message: str, phone: str, api_key: str) -> bool:
     """
-    Send message via Signal API using POST to avoid credentials in URL/logs.
+    Send message via Signal API (GET request as required by CallMeBot).
+
+    Credentials are not logged to avoid exposure in CI logs.
 
     Args:
         message: Message content to send
@@ -273,27 +279,28 @@ def send_via_signal(message: str, phone: str, api_key: str) -> bool:
     Returns:
         True if successful, False otherwise.
     """
-    payload = urllib.parse.urlencode({
+    params = urllib.parse.urlencode({
         'phone': phone,
         'apikey': api_key,
         'text': message,
-    }).encode('utf-8')
+    })
+    url = f"{SIGNAL_API_URL}?{params}"
 
-    request = urllib.request.Request(
-        SIGNAL_API_URL,
-        data=payload,
-        method='POST',
-        headers={'Content-Type': 'application/x-www-form-urlencoded'},
-    )
+    # Safe URL for logging — credentials redacted
+    safe_params = urllib.parse.urlencode({
+        'phone': phone,
+        'apikey': '***',
+        'text': f"[{len(message)} chars]",
+    })
+    logger.info(f"Sending to CallMeBot: {SIGNAL_API_URL}?{safe_params}")
 
     try:
-        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
+        with urllib.request.urlopen(url, timeout=REQUEST_TIMEOUT) as response:
             response_text = response.read().decode('utf-8')
 
-        # Log without leaking credentials
-        logger.info(f"Signal API response ({response.status}): {response_text}")
+        logger.info(f"Signal API response ({response.status}): {response_text[:200]}")
 
-        if 'error' in response_text.lower():
+        if 'Message not sent' in response_text or 'error' in response_text.lower():
             logger.error(f"Signal send failed: {response_text}")
             return False
 
