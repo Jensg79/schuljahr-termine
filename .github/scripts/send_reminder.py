@@ -12,7 +12,6 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
 
 # Configuration
 CHAR_LIMIT = 1500
@@ -269,11 +268,12 @@ def send_via_signal(message: str, phone: str, api_key: str) -> bool:
     """
     Send message via Signal API (GET request as required by CallMeBot).
 
+    Works with both phone numbers (+49123...) and UUIDs (d8b500f9-ec82-...).
     Credentials are not logged to avoid exposure in CI logs.
 
     Args:
         message: Message content to send
-        phone:   Signal phone number
+        phone:   Signal phone number or UUID
         api_key: CallMeBot API key
 
     Returns:
@@ -288,7 +288,7 @@ def send_via_signal(message: str, phone: str, api_key: str) -> bool:
 
     # Safe URL for logging — credentials redacted
     safe_params = urllib.parse.urlencode({
-        'phone': phone,
+        'phone': '***',
         'apikey': '***',
         'text': f"[{len(message)} chars]",
     })
@@ -320,7 +320,8 @@ def send_via_signal(message: str, phone: str, api_key: str) -> bool:
 
 def main() -> None:
     """Main entry point."""
-    # Load credentials
+    # Load credentials — .strip() handles accidental whitespace in secrets.
+    # UUID format (e.g. d8b500f9-ec82-476f-abab-9bc801e9e82b) is preserved as-is.
     phone   = os.environ.get('SIGNAL_PHONE', '').strip()
     api_key = os.environ.get('SIGNAL_APIKEY', '').strip()
 
