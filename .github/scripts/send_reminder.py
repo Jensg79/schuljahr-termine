@@ -7,6 +7,7 @@ and sends a message via the CallMeBot Signal API.
 Shows:
   - All events today and within the next 7 days
   - All events within the next 28 days that match HIGHLIGHT_TAGS
+    (including those already shown in the week section)
 """
 
 import logging
@@ -25,11 +26,11 @@ GREETING_NAME   = os.environ.get('GREETING_NAME', 'Jens')
 SIGNAL_API_URL  = "https://signal.callmebot.com/signal/send.php"
 REQUEST_TIMEOUT = 30
 
-# Tags that trigger the extended 28-day window.
+# Tags that trigger the highlight section (28-day window).
 # Can be overridden via environment variable (comma-separated):
 #   HIGHLIGHT_TAGS="Mathematik,Physik"
-_default_tags   = "Mathematik"
-HIGHLIGHT_TAGS  = {
+_default_tags  = "Mathematik"
+HIGHLIGHT_TAGS = {
     t.strip().lower()
     for t in os.environ.get('HIGHLIGHT_TAGS', _default_tags).split(',')
     if t.strip()
@@ -65,9 +66,9 @@ def parse_schedule_file(filepath: str) -> tuple[list[Termin], list[str]]:
     Line format (pipe-separated):
         YYYY-MM-DD | Aufgabe | Notiz (optional) | Tag1,Tag2 (optional)
 
-    Returns only events relevant for today's message:
+    Returns all events relevant for today's message:
         - days_until 0–7  (always shown)
-        - days_until 8–28 with a highlight tag
+        - days_until 0–28 with a highlight tag
     """
     termine   = []
     discarded = []
@@ -93,14 +94,14 @@ def parse_schedule_file(filepath: str) -> tuple[list[Termin], list[str]]:
                                  if len(parts) > 3 else []
                     days_until = (event_date - today).days
 
-                    in_week_window      = 0 <= days_until <= 7
-                    in_extended_window  = 8 <= days_until <= 28
-
                     termin = Termin(days_until, event_date,
                                    WEEKDAYS_DE[event_date.weekday()],
                                    task, note, tags)
 
-                    if in_week_window or (in_extended_window and termin.has_highlight_tag()):
+                    in_week_window     = 0 <= days_until <= 7
+                    in_extended_window = 0 <= days_until <= 28 and termin.has_highlight_tag()
+
+                    if in_week_window or in_extended_window:
                         termine.append(termin)
 
                 except ValueError:
@@ -124,7 +125,8 @@ def build_message(termine: list[Termin]) -> str:
 
     today_termine    = [t for t in termine if t.days_until == 0]
     week_termine     = [t for t in termine if 1 <= t.days_until <= 7]
-    extended_termine = [t for t in termine if t.days_until > 7]
+    # Highlight section: all matching tagged events in 0–28 day window
+    highlight_termine = [t for t in termine if t.has_highlight_tag() and t.days_until <= 28]
 
     lines = [f"Guten Morgen {GREETING_NAME} - {today_obj.strftime('%d.%m.%Y')} ({weekday})"]
 
@@ -148,11 +150,11 @@ def build_message(termine: list[Termin]) -> str:
                 entry += f" ({t.note})"
             lines.append(entry)
 
-    # Extended window: highlight-tagged events in days 8–28
-    if extended_termine:
+    # Highlight section: tagged events in full 28-day window (including week)
+    if highlight_termine:
         tag_label = ", ".join(sorted(HIGHLIGHT_TAGS)).title()
         lines.append(f"\n{tag_label} (naechste 4 Wochen):")
-        for t in extended_termine:
+        for t in highlight_termine:
             entry = f"  - {t.weekday} {t.event_date.strftime('%d.%m.')} (in {t.days_until}T) - {t.task}"
             if t.note:
                 entry += f" ({t.note})"
