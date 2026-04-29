@@ -7,7 +7,7 @@ Du wirst erinnert, wenn ein Termin in **4 Wochen**, **2 Wochen** oder **3 Tagen*
 
 Jede Zeile mit einem Termin folgt diesem Schema:
 
-<!--  YYYY-MM-DD | Aufgabe | (optional) Hinweis -->
+<!--  YYYY-MM-DD | Aufgabe | (optional) Hinweis | TAG Mathematik -->
 
 - Datum im Format **Jahr-Monat-Tag** (z.B. `2026-06-12`)
 - Trennzeichen: `|` (Pipe)
