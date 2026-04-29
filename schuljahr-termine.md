@@ -31,13 +31,11 @@ Jede Zeile mit einem Termin folgt diesem Schema:
 2026-05-06 | Frankreich-Austausch 8. Klasse - franz. Gegenbesuch | franz. SuS aus Aix-en-Provence am GG
 
 2026-05-07 | 5. Klassenrat | keine Kurzstunden
-2026-05-07 | Frankreich-Austausch 8. Klasse - franz. Gegenbesuch | franz. SuS aus Aix-en-Provence am GG
 
 2026-05-08 | Abitur schriftlich: Französisch | grundlegendes (und erhöhtes) Anforderungsniveau
 
 2026-05-11 | Abitur schriftlich: alle weiteren Fächer auf grundlegendem Anforderungsniveau
 
-2026-05-11 | Ausstellung "#move the date" (German Overshoot Day) | geplant 11.5. - 22.5.2026
 2026-05-11 | Einschreibung
 
 2026-05-12 | Einschreibung
