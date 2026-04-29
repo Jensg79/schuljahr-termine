@@ -1,7 +1,7 @@
 # Schuljahres-Termine — Fachleiter Mathematik
 
 Diese Datei wird täglich um 07:00 Uhr automatisch geprüft.
-Du wirst erinnert, wenn ein Termin in **4 Wochen**, **2 Wochen** oder **3 Tagen** ansteht.
+Du wirst erinnert, wenn ein Termin in **Heute**, **Woche** oder **Mathematik** ansteht.
 
 ## Format
 
@@ -20,7 +20,6 @@ Jede Zeile mit einem Termin folgt diesem Schema:
      Aufgaben eines Fachleiters Mathematik am bayerischen Gymnasium.
      Passe Daten und Inhalte an dein Schuljahr an oder lösche, was du nicht brauchst. -->
 
-2026-04-28 | Abitur schriftlich: Deutsch | 8.00 - 13.15 Uhr
 2026-04-28 | Gegenbesuch Ungarnaustausch | Ungarn bei uns, falls Austausch stattfindet (7. Klasse - korrigiert)
 
 2026-04-29 | Gegenbesuch Ungarnaustausch | Ungarn bei uns, falls Austausch stattfindet (7. Klasse - korrigiert)
