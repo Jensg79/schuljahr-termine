@@ -11,7 +11,7 @@ Dieser Task wird täglich um 07:00 Uhr von Cowork ausgeführt.
 ## Terminformat
 
 ```
-YYYY-MM-DD | Aufgabe | (optional) Hinweis
+YYYY-MM-DD | Aufgabe | (optional) Hinweis | Mathematik (als TAG)
 ```
 
 Zeilen mit `#` oder leerem Inhalt werden ignoriert.
