@@ -2,7 +2,7 @@ name: Tägliche Signal-Nachricht
 
 on:
   schedule:
-    - cron: '0 10 * * 1-5'  # Mo–Fr, 08:00 MESZ / 07:00 MEZ (kein Wochenende)
+    - cron: '0 6 * * 1-5'  # Mo–Fr, 08:00 MESZ / 07:00 MEZ (kein Wochenende)
   workflow_dispatch:
 
 jobs:
