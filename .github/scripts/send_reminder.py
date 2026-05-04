@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 # Configuration
-CHAR_LIMIT      = 1300
+CHAR_LIMIT      = 1500
 WEEKDAYS_DE     = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 SCHEDULE_FILE   = os.environ.get('SCHEDULE_FILE', 'schuljahr-termine.md')
 GREETING_NAME   = os.environ.get('GREETING_NAME', 'Jens')
