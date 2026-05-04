@@ -26,7 +26,7 @@ Jede Zeile mit einem Termin folgt diesem Schema:
 
 2026-04-30 | Abitur schriftlich: Englisch | grundlegendes und erhöhtes Anforderungsniveau
 2026-04-30 | Vorbereitung Abitur Mathematik | Einweisung Teil A für die Kollegen | Mathematik
-
+2026-05-04 | Teil A - Abitur | Reihenfolge | Mathematik
 
 2026-05-06 | Abitur schriftlich: Mathematik | 9.00 - 14.00 Uhr | Mathematik
 2026-05-06 | Frankreich-Austausch 8. Klasse - franz. Gegenbesuch | franz. SuS aus Aix-en-Provence am GG
